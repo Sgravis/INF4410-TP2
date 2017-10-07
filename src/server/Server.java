@@ -24,7 +24,6 @@ public class Server implements ServerInterface {
 
 		int capacite;
 		int taux_malveillance;
-		System.out.println(args.length);
 		if (args.length != 2)
 		{
 			System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./server Capacité Taux_Fiabilité\n");
@@ -57,7 +56,7 @@ public class Server implements ServerInterface {
 		try
 		{
 			ServerInterface stub = (ServerInterface) UnicastRemoteObject.exportObject(this, 0);
-			Registry registry = LocateRegistry.getRegistry();
+			Registry registry = LocateRegistry.getRegistry(5000);
 			registry.rebind("server", stub);
 			System.out.println("Server ready.");
 		}
@@ -77,21 +76,25 @@ public class Server implements ServerInterface {
 	{
 		this.resultat = 0;
 		String[] operation_liste = operation_string.split("&");
-		for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
-		{
-			String[] operation = operation_liste[i].split(":");
-			if (operation[0].equals("pell"))
+		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
+			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
 			{
-				this.resultat += (pell(Integer.parseInt(operation[1])))%4000;
+				String[] operation = operation_liste[i].split(":");
+				if (operation[0].equals("pell"))
+				{
+					this.resultat += (pell(Integer.parseInt(operation[1])))%4000;
+				}
+				else if (operation[0].equals("prime"))
+				{
+					this.resultat += (prime(Integer.parseInt(operation[1])))%4000;
+				}
+				else
+				{
+					continue; //En cas d'opération inconnue..
+				}
 			}
-			else if (operation[0].equals("prime"))
-			{
-				this.resultat += (prime(Integer.parseInt(operation[1])))%4000;
-			}
-			else
-			{
-				continue; //En cas d'opération inconnue..
-			}
+		} else {
+			this.resultat = -1;
 		}
 		return this.resultat%4000;
 	}
@@ -126,5 +129,9 @@ public class Server implements ServerInterface {
 	private int random(int border)
 	{
 		return (new Random().nextInt(border));
+	}
+
+	private Boolean HitRateCalculation(int number_operations) {
+			return (random(((number_operations - this.capacite)/(this.capacite*5))*100)) > (((number_operations - this.capacite)/(this.capacite*5))*100);
 	}
 }
