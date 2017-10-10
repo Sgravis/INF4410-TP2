@@ -10,6 +10,6 @@ import java.io.*;
 
 public interface ServerInterface extends Remote {
 
-	public int Calculer(String operation_string) throws RemoteException;
+	public String Calculer(String operation_string) throws RemoteException;
 
 }

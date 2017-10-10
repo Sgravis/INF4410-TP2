@@ -17,7 +17,7 @@ public class Server implements ServerInterface {
 
 	private int capacite;
 	private int taux_malveillance;
-	private int resultat;
+	private String resultat;
 
 
 	public static void main(String[] args) {
@@ -44,7 +44,7 @@ public class Server implements ServerInterface {
 		super();
 		this.capacite = capacite;
 		this.taux_malveillance = taux_malveillance;
-		this.resultat = 0;
+		this.resultat = "";
 	}
 
 	private void run()
@@ -72,9 +72,9 @@ public class Server implements ServerInterface {
 		}
 	}
 
-	public int Calculer(String operation_string) throws RemoteException
+	public String Calculer(String operation_string) throws RemoteException
 	{
-		this.resultat = 0;
+		this.resultat = "";
 		String[] operation_liste = operation_string.split("&");
 		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
 			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
@@ -82,11 +82,11 @@ public class Server implements ServerInterface {
 				String[] operation = operation_liste[i].split(":");
 				if (operation[0].equals("pell"))
 				{
-					this.resultat += (pell(Integer.parseInt(operation[1])))%4000;
+					this.resultat += Integer.toString((pell(Integer.parseInt(operation[1])))%4000) + "&";
 				}
 				else if (operation[0].equals("prime"))
 				{
-					this.resultat += (prime(Integer.parseInt(operation[1])))%4000;
+					this.resultat += Integer.toString((prime(Integer.parseInt(operation[1])))%4000) + "&";
 				}
 				else
 				{
@@ -94,9 +94,9 @@ public class Server implements ServerInterface {
 				}
 			}
 		} else {
-			this.resultat = -1;
+			this.resultat = null;
 		}
-		return this.resultat%4000;
+		return this.resultat;
 	}
 
 	private int pell(int valeur)

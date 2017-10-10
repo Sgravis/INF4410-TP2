@@ -17,7 +17,9 @@ import shared.ServerInterface;
 public class Client {
   private int _mode;
   private ArrayList<Operation> operations_stack;
+  private ArrayList<Operation> in_progress_operations_stack;
   private HashMap<RepartiteurThread, Integer> threads;
+  private int result;
 
 	public static void main(String[] args) {
     HashMap<String,Integer> socket = new HashMap<String, Integer>();
@@ -65,8 +67,18 @@ public class Client {
 	}
 
 	private void run() {
-    ExecutorService tasks = Executors.newFixedThreadPool(threads.size());
+    ExecutorService task_executor = Executors.newFixedThreadPool(threads.size());
+    while(!(this.operations_stack.isEmpty()) && !(this.in_progress_operations_stack.isEmpty())) {
+      for (Operation operation_in_progress : this.in_progress_operations_stack) {
 
+      }
+      
+
+    }
+    while(!(task_executor.isTerminated())) {
+      continue;
+    }
+    System.out.println(this.result);
 	}
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
@@ -98,7 +110,7 @@ public class Client {
 	}
 
   private void FileToArray(String file) {
-    try (BufferedReader lines = new BufferedReader(new FileReader("src/client/" + file))) {
+    try (BufferedReader lines = new BufferedReader(new FileReader("Operations/" + file))) {
       String line;
       while ((line = lines.readLine()) != null) {
         if (this._mode == 0)
