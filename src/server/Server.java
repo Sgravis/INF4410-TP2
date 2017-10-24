@@ -76,7 +76,7 @@ public class Server implements ServerInterface {
 	{
 		this.resultat = "";
 		String[] operation_liste = operation_string.split("&");
-		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
+		//if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
 			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
 			{
 				String[] operation = operation_liste[i].split(":");
@@ -93,9 +93,9 @@ public class Server implements ServerInterface {
 					continue; //En cas d'opération inconnue..
 				}
 			}
-		} else {
-			this.resultat = null;
-		}
+		//} else {
+			//this.resultat = null;
+		//}
 		return this.resultat;
 	}
 

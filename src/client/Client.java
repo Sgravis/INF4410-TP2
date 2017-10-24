@@ -16,17 +16,17 @@ import shared.ServerInterface;
 
 public class Client {
   private int _mode;
-  private ArrayList<Operation> operations_stack;
-  private ArrayList<Operation> in_progress_operations_stack;
+  private ArrayList<Operation> operations_stack; //operations a faire
+  private ArrayList<Operation> in_progress_operations_stack; //operations en traitement
   private HashMap<RepartiteurThread, Integer> threads;
   private int result;
 
 	public static void main(String[] args) {
     HashMap<String,Integer> socket = new HashMap<String, Integer>();
-    HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();
+    HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();//hashmap contenant les socket serveur et leur capacité
 
     if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) {
-      System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./server Fichier  Mode d'execution:(S = 0/NS = 1)\n");
+      System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./client Fichier  Mode d'execution:(S = 0/NS = 1)\n");
     }
     else
     {
@@ -62,22 +62,13 @@ public class Client {
    for (RepartiteurThread thread : threads.keySet()) {
      for (int i=0 ; i<3; i++) {
        setCapacity(thread, true);
-     }
-   }
+      }
+    }
 	}
 
 	private void run() {
     ExecutorService task_executor = Executors.newFixedThreadPool(threads.size());
-    while(!(this.operations_stack.isEmpty()) && !(this.in_progress_operations_stack.isEmpty())) {
-      for (Operation operation_in_progress : this.in_progress_operations_stack) {
-
-      }
-      
-
-    }
-    while(!(task_executor.isTerminated())) {
-      continue;
-    }
+    
     System.out.println(this.result);
 	}
 
@@ -116,7 +107,7 @@ public class Client {
         if (this._mode == 0)
           this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 1));
         else if (this._mode == 1)
-          this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 3));
+          this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 2));
       }
     }
     catch (IOException e)

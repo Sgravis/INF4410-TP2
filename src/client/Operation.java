@@ -32,12 +32,6 @@ public class Operation {
     return this.solved;
   }
 
-  public void Validate() {
-    if (this.validation == 0) {
-      this.solved = true;
-    }
-  }
-
   public String getOperationName() {
     return this.operation_name;
   }
@@ -46,20 +40,26 @@ public class Operation {
     return this.operande;
   }
 
-  public int getValidation() {
-    return this.validation;
-  }
-
-  public void setValidation(Boolean same_result) {
-    if (same_result){
-      this.validation--;
-    } else if (this.validation < 3){
-      this.validation++;
+  public void setValidation() {
+    if(validation == 1)
+    {
+      this.result=this.possible_results[0];
+      this.solved=true;
     }
+    else
+    {
+      for(int i = 0; i < possible_results.size(); i++) {
+       for (int j = i + 1; j < possible_results.size(); j++) {
+        if (possible_results[i] == possible_results[j]) {
+          this.result = possible_results[i];
+          this.solved = true;
+        }
+       }
+    }
+    
   }
 
   public void setResult(int result) {
-    this.result = result;
     this.possible_results.add(result);
   }
 
@@ -67,11 +67,5 @@ public class Operation {
     return this.result;
   }
 
-  public void checkResults(int result) {
-    for (Integer possibleresult : possible_results) {
-      if (possibleresult == result) {
-        setResult(result);
-      }
-    }
-  }
+
 }
