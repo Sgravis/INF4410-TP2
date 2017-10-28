@@ -21,8 +21,9 @@ public class RepartiteurThread extends Thread {
   private String[] results;
 
 
-  RepartiteurThread(ServerInterface stub) {
-    this.stub = stub;
+  RepartiteurThread(ArrayList<ServerInterface> servers, ArrayList<Operation> task) {
+
+    this.stub = servers.get(0);
     this.clean_answer = true;
     this.results = null;
     this.task = task;
@@ -30,6 +31,8 @@ public class RepartiteurThread extends Thread {
 
   public void run()
  {
+   System.out.println("Run");
+   System.out.println(Thread.currentThread().getName());
    String tampon = "";
    try {
      this.results = null;
@@ -47,6 +50,9 @@ public class RepartiteurThread extends Thread {
      } else {
        this.clean_answer = false;
      }
+    for (Operation o : task) {
+      System.out.println(o.getResult());
+    }
 
    } catch (RemoteException e) {
      System.out.println("Erreur: " + e.getMessage());

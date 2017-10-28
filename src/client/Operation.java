@@ -21,6 +21,7 @@ public class Operation {
   private ArrayList<Integer> possible_results;
 
   Operation(String name, int operande, int validation) {
+    possible_results = new ArrayList<Integer>();
     this.operation_name = name;
     this.operande = operande;
     this.validation = validation;
@@ -43,21 +44,21 @@ public class Operation {
   public void setValidation() {
     if(validation == 1)
     {
-      this.result=this.possible_results[0];
+      this.result=this.possible_results.get(0);
       this.solved=true;
     }
     else
     {
       for(int i = 0; i < possible_results.size(); i++) {
        for (int j = i + 1; j < possible_results.size(); j++) {
-        if (possible_results[i] == possible_results[j]) {
-          this.result = possible_results[i];
+        if (possible_results.get(i) == possible_results.get(j)) {
+          this.result = possible_results.get(i);
           this.solved = true;
         }
        }
     }
-    
   }
+}
 
   public void setResult(int result) {
     this.possible_results.add(result);
@@ -66,6 +67,4 @@ public class Operation {
   public int getResult() {
     return this.result;
   }
-
-
 }

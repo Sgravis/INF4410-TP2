@@ -18,7 +18,7 @@ public class Client {
   private int _mode;
   private ArrayList<Operation> operations_stack; //operations a faire
   private ArrayList<Operation> in_progress_operations_stack; //operations en traitement
-  private HashMap<RepartiteurThread, Integer> threads;
+  private HashMap<ServerInterface, Integer> server_list;
   private int result;
 
 	public static void main(String[] args) {
@@ -50,27 +50,31 @@ public class Client {
 	public Client(HashMap<HashMap<String, Integer>, Integer> servers, String file, int mode) {
 		super();
     this._mode = mode;
+    this.operations_stack = new ArrayList<Operation>();
+    this.in_progress_operations_stack = new ArrayList<Operation>();
+    this.server_list = new HashMap<ServerInterface, Integer>();
 		if (System.getSecurityManager() == null)
 		{
 			System.setSecurityManager(new SecurityManager());
 		}
     FileToArray(file);
-   for (HashMap<String,Integer> socket : servers.keySet())
-   {
-	 	threads.put(new RepartiteurThread(loadServerStub(socket)), servers.get(socket));
-   }
-   for (RepartiteurThread thread : threads.keySet()) {
-     for (int i=0 ; i<3; i++) {
-       setCapacity(thread, true);
+    for (HashMap<String, Integer> socket : servers.keySet()) {
+        server_list.put(loadServerStub(socket), servers.get(socket));
       }
-    }
 	}
 
 	private void run() {
-    ExecutorService task_executor = Executors.newFixedThreadPool(threads.size());
-    
-    System.out.println(this.result);
-	}
+    long i = 50000000;
+    ExecutorService task_executor = Executors.newFixedThreadPool(1);
+    RepartiteurThread t = new RepartiteurThread(new ArrayList<ServerInterface>(server_list.keySet()), operations_stack);
+    task_executor.execute(t);
+    while( i > 0) {
+      i--;
+    }
+    for (Operation o : operations_stack) {
+      System.out.println(o.getResult());
+    }
+}
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
 		ServerInterface stub = null;
@@ -116,12 +120,11 @@ public class Client {
     }
   }
 
-  private void setCapacity(RepartiteurThread thread, Boolean uprate) {
+  private void setCapacity(ServerInterface stub, Boolean uprate) {
     if (uprate){
-      threads.put(thread, threads.get(thread) + threads.get(thread));
+      server_list.put(stub, server_list.get(stub) + server_list.get(stub));
     } else {
-      threads.put(thread, threads.get(thread) - threads.get(thread));
+      server_list.put(stub, server_list.get(stub) - server_list.get(stub));
     }
-
   }
 }
