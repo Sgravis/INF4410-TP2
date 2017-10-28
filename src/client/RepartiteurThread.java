@@ -21,9 +21,9 @@ public class RepartiteurThread extends Thread {
   private String[] results;
 
 
-  RepartiteurThread(ArrayList<ServerInterface> servers, ArrayList<Operation> task) {
+  RepartiteurThread(ServerInterface stub) {
 
-    this.stub = servers.get(0);
+    this.stub = stub;
     this.clean_answer = true;
     this.results = null;
     this.task = task;

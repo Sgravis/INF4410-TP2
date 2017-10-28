@@ -18,7 +18,7 @@ public class Client {
   private int _mode;
   private ArrayList<Operation> operations_stack; //operations a faire
   private ArrayList<Operation> in_progress_operations_stack; //operations en traitement
-  private HashMap<ServerInterface, Integer> server_list;
+  private HashMap<RepartiteurThread, Integer> threads;
   private int result;
 
 	public static void main(String[] args) {
@@ -52,27 +52,20 @@ public class Client {
     this._mode = mode;
     this.operations_stack = new ArrayList<Operation>();
     this.in_progress_operations_stack = new ArrayList<Operation>();
-    this.server_list = new HashMap<ServerInterface, Integer>();
+    this.threads = new HashMap<RepartiteurThread, Integer>();
 		if (System.getSecurityManager() == null)
 		{
 			System.setSecurityManager(new SecurityManager());
 		}
     FileToArray(file);
     for (HashMap<String, Integer> socket : servers.keySet()) {
-        server_list.put(loadServerStub(socket), servers.get(socket));
+        threads.put(new RepartiteurThread(loadServerStub(socket)), servers.get(socket));
       }
 	}
 
 	private void run() {
-    long i = 50000000;
-    ExecutorService task_executor = Executors.newFixedThreadPool(1);
-    RepartiteurThread t = new RepartiteurThread(new ArrayList<ServerInterface>(server_list.keySet()), operations_stack);
-    task_executor.execute(t);
-    while( i > 0) {
-      i--;
-    }
-    for (Operation o : operations_stack) {
-      System.out.println(o.getResult());
+    while(!operations_stack.isEmpty()) {
+      
     }
 }
 
@@ -120,11 +113,11 @@ public class Client {
     }
   }
 
-  private void setCapacity(ServerInterface stub, Boolean uprate) {
+  private void setCapacity(RepartiteurThread thread, Boolean uprate) {
     if (uprate){
-      server_list.put(stub, server_list.get(stub) + server_list.get(stub));
+      threads.put(thread, threads.get(thread) + threads.get(thread));
     } else {
-      server_list.put(stub, server_list.get(stub) - server_list.get(stub));
+      threads.put(thread, threads.get(thread) - threads.get(thread));
     }
   }
 }
