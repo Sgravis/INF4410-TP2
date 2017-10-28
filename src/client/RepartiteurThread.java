@@ -18,45 +18,83 @@ public class RepartiteurThread extends Thread {
   private Boolean clean_answer;
   private ArrayList<Operation> task;
   private String serial_string;
-  private String[] results;
+  private boolean busy;
+  private boolean inprogress;
+
 
 
   RepartiteurThread(ServerInterface stub) {
 
+
     this.stub = stub;
-    this.clean_answer = true;
-    this.results = null;
-    this.task = task;
+    this.overload = false;
+    this.busy=false;
+    this.inprogress=true;
   }
 
   public void run()
- {
-   System.out.println("Run");
-   System.out.println(Thread.currentThread().getName());
-   String tampon = "";
-   try {
-     this.results = null;
-     this.serial_string = Integer.toString(this.task.size());
-     for (Operation operation : this.task) {
-       this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
-     }
-     tampon = stub.Calculer(this.serial_string);
-     if (!tampon.equals(null)) {
-       this.results = tampon.split("&");
-       for (int i = 0; i < this.results.length; i++) {
-           this.task.get(i).setResult(Integer.parseInt(this.results[i]));
-           this.task.get(i).setValidation();
-       }
-     } else {
-       this.clean_answer = false;
-     }
-    for (Operation o : task) {
-      System.out.println(o.getResult());
+  {
+    while(inprogress)
+    {
+      if (busy)
+      {
+        traitement();
+      }
+    }
+  }
+
+    private void traitement()
+    {
+      String tampon = "";
+      try 
+      {
+        this.serial_string = Integer.toString(this.task.size());
+        for (Operation operation : this.task) 
+        {
+          this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
+        }
+        tampon = stub.Calculer(this.serial_string);
+        if (!tampon.equals(null)) 
+        {
+          this.results = tampon.split("&");
+          for (int i = 0; i < this.results.length; i++) 
+          {
+             this.task.get(i).setResult(Integer.parseInt(this.results[i]));
+             this.task.get(i).setValidation();
+          }
+        }else 
+        {
+         this.overload = true;
+        }
+        for (Operation o : task) 
+        {
+          System.out.println(o.getResult());
+        }
+      }catch (RemoteException e) 
+      {
+       System.out.println("Erreur: " + e.getMessage());
+      }
+      System.out.println("fin du traitement");
+      this.busy=false;
+
     }
 
-   } catch (RemoteException e) {
-     System.out.println("Erreur: " + e.getMessage());
-   }
+
+ }
+
+
+ public void setInprogress(Boolean value)
+ {
+  this.inprogress=value;
+ }
+ public Boolean getBusy()
+ {
+  return this.busy;
+ }
+ public setTask(ArrayList<Operation> task)
+ {
+  this.task = task;
+  this.busy=true;
  }
 
 }

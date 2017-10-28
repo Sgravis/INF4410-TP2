@@ -19,6 +19,7 @@ public class Operation {
   private int validation;
   private int result;
   private ArrayList<Integer> possible_results;
+  private Boolean treatment;
 
   Operation(String name, int operande, int validation) {
     possible_results = new ArrayList<Integer>();
@@ -27,6 +28,7 @@ public class Operation {
     this.validation = validation;
     this.solved = false;
     this.result = 0;
+    this.treatment =talse;
   }
 
   public Boolean isSolved() {
@@ -42,6 +44,7 @@ public class Operation {
   }
 
   public void setValidation() {
+    this.treatment=true;
     if(validation == 1)
     {
       this.result=this.possible_results.get(0);
@@ -66,5 +69,12 @@ public class Operation {
 
   public int getResult() {
     return this.result;
+  }
+  public Boolean getTreatment(){
+    return this.treatment;
+  }
+  public void setTreatment(Boolean value)
+  {
+    this.treatment=value;
   }
 }
