@@ -15,11 +15,12 @@ import shared.ServerInterface;
 public class RepartiteurThread extends Thread {
 
   private ServerInterface stub;
-  private Boolean clean_answer;
+  private Boolean overload;
   private ArrayList<Operation> task;
   private String serial_string;
   private boolean busy;
   private boolean inprogress;
+  private String[] results;
 
 
 
@@ -46,55 +47,52 @@ public class RepartiteurThread extends Thread {
     private void traitement()
     {
       String tampon = "";
-      try 
+      try
       {
         this.serial_string = Integer.toString(this.task.size());
-        for (Operation operation : this.task) 
+        for (Operation operation : this.task)
         {
           this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
         }
         tampon = stub.Calculer(this.serial_string);
-        if (!tampon.equals(null)) 
+        if (!tampon.equals(null))
         {
           this.results = tampon.split("&");
-          for (int i = 0; i < this.results.length; i++) 
+          for (int i = 0; i < this.results.length; i++)
           {
              this.task.get(i).setResult(Integer.parseInt(this.results[i]));
              this.task.get(i).setValidation();
           }
-        }else 
+        }else
         {
          this.overload = true;
         }
-        for (Operation o : task) 
+        for (Operation o : task)
         {
           System.out.println(o.getResult());
         }
-      }catch (RemoteException e) 
+      }catch (RemoteException e)
       {
        System.out.println("Erreur: " + e.getMessage());
       }
       System.out.println("fin du traitement");
       this.busy=false;
-
     }
 
+    public void setInprogress(Boolean value)
+    {
+      this.inprogress=value;
+    }
+
+    public Boolean getBusy()
+    {
+      return this.busy;
+    }
+
+    public void setTask(ArrayList<Operation> task)
+    {
+      this.task = task;
+      this.busy=true;
+    }
 
  }
-
-
- public void setInprogress(Boolean value)
- {
-  this.inprogress=value;
- }
- public Boolean getBusy()
- {
-  return this.busy;
- }
- public setTask(ArrayList<Operation> task)
- {
-  this.task = task;
-  this.busy=true;
- }
-
-}

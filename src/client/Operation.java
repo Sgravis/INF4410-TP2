@@ -13,10 +13,20 @@ import server.Operations;
 import shared.ServerInterface;
 
 public class Operation {
+
+  // Nom de l'opération : Pell ou Prime
   private String operation_name;
+
+  // Opérande associé à l'opération
   private int operande;
+
+  // Booléen permettant la vérification de la résolution de l'opération.
   private Boolean solved;
+
+  // Entier permettant de savoir si l'on se trouve en mode sécurisé ou non.
   private int validation;
+
+  //
   private int result;
   private ArrayList<Integer> possible_results;
   private Boolean treatment;
@@ -28,7 +38,7 @@ public class Operation {
     this.validation = validation;
     this.solved = false;
     this.result = 0;
-    this.treatment =talse;
+    this.treatment = false;
   }
 
   public Boolean isSolved() {
