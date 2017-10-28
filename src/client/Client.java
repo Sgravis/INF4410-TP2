@@ -53,6 +53,7 @@ public class Client {
     this.operations_stack = new ArrayList<Operation>();
     this.in_progress_operations_stack = new ArrayList<Operation>();
     this.threads = new HashMap<RepartiteurThread, Integer>();
+    this.result = 0;
 		if (System.getSecurityManager() == null)
 		{
 			System.setSecurityManager(new SecurityManager());
@@ -63,11 +64,47 @@ public class Client {
       }
 	}
 
-	private void run() {
-    while(!operations_stack.isEmpty()) {
-      
+	private void run()
+  {
+    ArrayList<Operation> task = new ArrayList<Operation>();
+    while(!operations_stack.isEmpty() && !in_progress_operations_stack.isEmpty())
+    {
+
+      //Traitement des threads : On vérifie leur état avant de leur envoyer une tache s'ils sont disponibles.
+      for (RepartiteurThread thread : threads.keySet())
+      {
+        if(!thread.getBusy())
+        {
+          task.clear();
+          for (int i = 0; i < threads.get(thread); i++)
+          {
+            task.add(operations_stack.get(i));
+            operations_stack.remove(operations_stack.get(i));
+          }
+          thread.setTask(task);
+          in_progress_operations_stack.addAll(task);
+        }
+      }
+
+      //Traitement de la pile d'opération : On vérifie la résolution des opérations en cours de traitement.
+      for (Operation operation_inprogress : in_progress_operations_stack) {
+        if (operation_inprogress.getTreatment())
+        {
+          if(operation_inprogress.isSolved())
+          {
+            this.result += operation_inprogress.getResult();
+          }
+          else
+          {
+            operation_inprogress.setTreatment(false);
+            operations_stack.add(operation_inprogress);
+            in_progress_operations_stack.remove(operation_inprogress);
+
+          }
+        }
+      }
     }
-}
+  }
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
 		ServerInterface stub = null;
