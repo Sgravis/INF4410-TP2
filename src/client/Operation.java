@@ -1,9 +1,3 @@
-package client;
-
-import java.io.*;
-import java.lang.*;
-import java.rmi.ConnectException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -41,7 +35,7 @@ public class Operation {
     this.treatment = false;
   }
 
-  public synchronized Boolean isSolved() {
+  public Boolean isSolved() {
     return this.solved;
   }
 
@@ -53,7 +47,7 @@ public class Operation {
     return this.operande;
   }
 
-  public synchronized void setValidation() {
+  public void setValidation() {
     this.treatment=true;
     if(validation == 1)
     {
@@ -73,17 +67,17 @@ public class Operation {
   }
 }
 
-  public  synchronized void setResult(int result) {
+  public void setResult(int result) {
     this.possible_results.add(result);
   }
 
-  public  synchronized int getResult() {
+  public int getResult() {
     return this.result;
   }
-  public  synchronized Boolean getTreatment(){
+  public Boolean getTreatment(){
     return this.treatment;
   }
-  public synchronized void setTreatment(Boolean value)
+  public void setTreatment(Boolean value)
   {
     this.treatment=value;
   }
