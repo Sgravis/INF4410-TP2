@@ -17,6 +17,8 @@ public class RepartiteurThread extends Thread {
   private ServerInterface stub;
   private Boolean overload;
   private ArrayList<Operation> task;
+  private ArrayList<Operation> operations;
+   private ArrayList<Operation> resultat;
   private String serial_string;
   private boolean busy;
   private boolean inprogress;
@@ -24,75 +26,64 @@ public class RepartiteurThread extends Thread {
 
 
 
-  RepartiteurThread(ServerInterface stub) {
+  RepartiteurThread(ServerInterface stub, int capacity, ArrayList<Operation> op, ArrayList<Operation> resultat) {
 
 
     this.stub = stub;
     this.overload = false;
-    this.busy=false;
-    this.inprogress=true;
+    this.operations= new ArrayList<Operation>();
+    this.task= new ArrayList<Operation>();
+    this.resultat=resultat;
+    this.operations=op;
+    this.capacity=capacity;
   }
-
   public void run()
   {
-    while(inprogress)
-    {
-      if (busy)
-      {
-        traitement();
-      }
-    }
+
+    traitement();
+    
   }
 
-    private void traitement()
+    private synchronized void traitement()
     {
-      String tampon = "";
-      try
+      while (!operations.isEmpty())
       {
-        this.serial_string = Integer.toString(this.task.size());
-        for (Operation operation : this.task)
+
+        String tampon = "";
+        try
         {
-          this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
-        }
-        tampon = stub.Calculer(this.serial_string);
-        if (!tampon.equals(null))
-        {
-          this.results = tampon.split("&");
-          for (int i = 0; i < this.results.length; i++)
+          this.serial_string = Integer.toString(this.task.size());
+          for (Operation operation : this.task)
           {
-             this.task.get(i).setResult(Integer.parseInt(this.results[i]));
-             this.task.get(i).setValidation();
+            this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
           }
-        }else
+          tampon = stub.Calculer(this.serial_string);
+          if (!tampon.equals(null))
+          {
+            this.results = tampon.split("&");
+            for (int i = 0; i < this.results.length; i++)
+            {
+               this.task.get(i).setResult(Integer.parseInt(this.results[i]));
+               this.task.get(i).setValidation();
+
+
+            }
+          }else
+          {
+           this.overload = true;
+          }
+          for (Operation o : task)
+          {
+            System.out.println(o.getResult());
+          }
+        }catch (RemoteException e)
         {
-         this.overload = true;
+         System.out.println("Erreur: " + e.getMessage());
         }
-        for (Operation o : task)
-        {
-          System.out.println(o.getResult());
-        }
-      }catch (RemoteException e)
-      {
-       System.out.println("Erreur: " + e.getMessage());
+        System.out.println("fin du traitement");
+        this.busy=false;
       }
-      System.out.println("fin du traitement");
-      this.busy=false;
-    }
 
-    public void setInprogress(Boolean value)
-    {
-      this.inprogress=value;
-    }
-
-    public Boolean getBusy()
-    {
-      return this.busy;
-    }
-
-    public void setTask(ArrayList<Operation> task)
-    {
-      this.task = task;
-      this.busy=true;
     }
 
  }

@@ -41,7 +41,7 @@ public class Operation {
     this.treatment = false;
   }
 
-  public Boolean isSolved() {
+  public synchronized Boolean isSolved() {
     return this.solved;
   }
 
@@ -53,7 +53,7 @@ public class Operation {
     return this.operande;
   }
 
-  public void setValidation() {
+  public synchronized void setValidation() {
     this.treatment=true;
     if(validation == 1)
     {
@@ -73,17 +73,17 @@ public class Operation {
   }
 }
 
-  public void setResult(int result) {
+  public  synchronized void setResult(int result) {
     this.possible_results.add(result);
   }
 
-  public int getResult() {
+  public  synchronized int getResult() {
     return this.result;
   }
-  public Boolean getTreatment(){
+  public  synchronized Boolean getTreatment(){
     return this.treatment;
   }
-  public void setTreatment(Boolean value)
+  public synchronized void setTreatment(Boolean value)
   {
     this.treatment=value;
   }

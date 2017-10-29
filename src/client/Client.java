@@ -14,10 +14,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import shared.ServerInterface;
 
+
 public class Client {
   private int _mode;
   private ArrayList<Operation> operations_stack; //operations a faire
   private ArrayList<Operation> in_progress_operations_stack; //operations en traitement
+  private ArrayList<Operation> processed_operations_stack;
   private HashMap<RepartiteurThread, Integer> threads;
   private int result;
 
@@ -42,7 +44,7 @@ public class Client {
         System.out.println("Erreur: " + e.getMessage());
       }
       Client client = new Client(servers, args[0], Integer.parseInt(args[1]));
-      client.run();
+      client.exec();
     }
 	}
 
@@ -52,6 +54,7 @@ public class Client {
     this._mode = mode;
     this.operations_stack = new ArrayList<Operation>();
     this.in_progress_operations_stack = new ArrayList<Operation>();
+    this.processed_operations_stack = new ArrayList<Operation>();
     this.threads = new HashMap<RepartiteurThread, Integer>();
     this.result = 0;
 		if (System.getSecurityManager() == null)
@@ -62,12 +65,16 @@ public class Client {
     for (HashMap<String, Integer> socket : servers.keySet()) {
         threads.put(new RepartiteurThread(loadServerStub(socket)), servers.get(socket));
       }
+    for (RepartiteurThread thread : threads.keySet()) 
+    {
+      thread.start();
+    }
 	}
 
-	private void run()
+	private synchronized void exec()
   {
     ArrayList<Operation> task = new ArrayList<Operation>();
-    while(!operations_stack.isEmpty() && !in_progress_operations_stack.isEmpty())
+    while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty())
     {
 
       //Traitement des threads : On vérifie leur état avant de leur envoyer une tache s'ils sont disponibles.
@@ -78,32 +85,37 @@ public class Client {
           task.clear();
           for (int i = 0; i < threads.get(thread); i++)
           {
-            task.add(operations_stack.get(i));
-            operations_stack.remove(operations_stack.get(i));
+            if(!operations_stack.isEmpty())
+            {
+
+              task.add(operations_stack.get(0));
+              operations_stack.remove(operations_stack.get(0));
+            }
           }
           thread.setTask(task);
           in_progress_operations_stack.addAll(task);
         }
       }
-
       //Traitement de la pile d'opération : On vérifie la résolution des opérations en cours de traitement.
       for (Operation operation_inprogress : in_progress_operations_stack) {
         if (operation_inprogress.getTreatment())
         {
           if(operation_inprogress.isSolved())
           {
-            this.result += operation_inprogress.getResult();
+
+            this.result += operation_inprogress.getResult()%4000;
           }
           else
           {
             operation_inprogress.setTreatment(false);
             operations_stack.add(operation_inprogress);
-            in_progress_operations_stack.remove(operation_inprogress);
 
           }
+          in_progress_operations_stack.remove(operation_inprogress);
         }
       }
     }
+    System.out.println("final :" +this.result);
   }
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
