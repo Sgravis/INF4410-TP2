@@ -14,12 +14,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import shared.ServerInterface;
 
-
 public class Client {
   private int _mode;
   private ArrayList<Operation> operations_stack; //operations a faire
-  private ArrayList<Operation> in_progress_operations_stack; //operations en traitement
-  private ArrayList<Operation> processed_operations_stack;
+  private List<Operation> in_progress_operations_stack; //operations en traitement
   private HashMap<RepartiteurThread, Integer> threads;
   private int result;
 
@@ -44,7 +42,7 @@ public class Client {
         System.out.println("Erreur: " + e.getMessage());
       }
       Client client = new Client(servers, args[0], Integer.parseInt(args[1]));
-      client.exec();
+      client.run();
     }
 	}
 
@@ -53,8 +51,7 @@ public class Client {
 		super();
     this._mode = mode;
     this.operations_stack = new ArrayList<Operation>();
-    this.in_progress_operations_stack = new ArrayList<Operation>();
-    this.processed_operations_stack = new ArrayList<Operation>();
+    this.in_progress_operations_stack = Collections.synchronizedList(new ArrayList<Operation>());
     this.threads = new HashMap<RepartiteurThread, Integer>();
     this.result = 0;
 		if (System.getSecurityManager() == null)
@@ -63,15 +60,14 @@ public class Client {
 		}
     FileToArray(file);
     for (HashMap<String, Integer> socket : servers.keySet()) {
-        threads.put(new RepartiteurThread(loadServerStub(socket)), servers.get(socket));
+        RepartiteurThread t = new RepartiteurThread(loadServerStub(socket));
+        threads.put(t, servers.get(socket));
+        t.start();
+
       }
-    for (RepartiteurThread thread : threads.keySet()) 
-    {
-      thread.start();
-    }
 	}
 
-	private synchronized void exec()
+	private void run()
   {
     ArrayList<Operation> task = new ArrayList<Operation>();
     while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty())
@@ -82,27 +78,34 @@ public class Client {
       {
         if(!thread.getBusy())
         {
-          task.clear();
-          for (int i = 0; i < threads.get(thread); i++)
+          if(!operations_stack.isEmpty())
           {
-            if(!operations_stack.isEmpty())
+            task.clear();
+            for (int i = 0; i < threads.get(thread); i++)
             {
+              if(!operations_stack.isEmpty())
+              {
+                 task.add(operations_stack.get(0));
+                 operations_stack.remove(operations_stack.get(0));
+              }
 
-              task.add(operations_stack.get(0));
-              operations_stack.remove(operations_stack.get(0));
             }
+            thread.setTask(task);
+            in_progress_operations_stack.addAll(task);
           }
-          thread.setTask(task);
-          in_progress_operations_stack.addAll(task);
         }
       }
+
+    
       //Traitement de la pile d'opération : On vérifie la résolution des opérations en cours de traitement.
-      for (Operation operation_inprogress : in_progress_operations_stack) {
+      Iterator it = in_progress_operations_stack.iterator();
+      while (it.hasNext())
+      {
+        Operation operation_inprogress =(Operation)it.next();
         if (operation_inprogress.getTreatment())
         {
           if(operation_inprogress.isSolved())
           {
-
             this.result += operation_inprogress.getResult()%4000;
           }
           else
@@ -111,11 +114,21 @@ public class Client {
             operations_stack.add(operation_inprogress);
 
           }
-          in_progress_operations_stack.remove(operation_inprogress);
+
+          it.remove();
         }
+
       }
+  
     }
-    System.out.println("final :" +this.result);
+      for (RepartiteurThread thread : threads.keySet())
+      {
+       thread.setInprogress(false);
+      } 
+
+
+
+    System.out.println("result:"+this.result);
   }
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
