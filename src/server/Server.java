@@ -15,8 +15,14 @@ import shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
+	// Capacité de notre serveur.
 	private int capacite;
+
+	// taux de malveillance théorique de notre serveur .
+	// Représente les mauvaises réponses qu'il peut nous renvoyer.
 	private int taux_malveillance;
+
+	// Résultat sérialisé de l'opération que le serveur vient de traiter.
 	private String resultat;
 
 
@@ -40,6 +46,12 @@ public class Server implements ServerInterface {
 		}
 	}
 
+	/**
+	 * Constructeur du serveur.
+	 * @param  int capacite         Capacité du serveur.
+	 * @param  int taux_malveillance Taux de malveillance du serveur.
+	 * @return     Serveur
+	 */
 	public Server(int capacite, int taux_malveillance) {
 		super();
 		this.capacite = capacite;
@@ -72,6 +84,12 @@ public class Server implements ServerInterface {
 		}
 	}
 
+	/**
+	 * Méthode pour le traitement d'une liste d'opérations.
+	 * @param  String          operation_string opérations à faire sous forme sérialisée.
+	 * @return                 résultat des opérations sous forme sérialisée.
+	 * @throws RemoteException concernant l'appel aux RPC.
+	 */
 	public String Calculer(String operation_string) throws RemoteException
 	{
 		this.resultat = "";

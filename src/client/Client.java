@@ -15,24 +15,38 @@ import java.util.concurrent.Executors;
 import shared.ServerInterface;
 
 public class Client {
+
+  // Type de sécurité pour notre Répartiteur : 0 = sécurisé / 1 = non sécurisé.
   private int _mode;
-  private ArrayList<Operation> operations_stack; //operations a faire
-  private List<Operation> in_progress_operations_stack; //operations en traitement
+
+  // Liste contenant les opérations à répartir entre nos différents clients.
+  private ArrayList<Operation> operations_stack;
+
+  // Liste contenant les opérations en cours de traitement par nos serveurs.
+  private List<Operation> in_progress_operations_stack;
+
+  // Hashmap contenant chaque threads (1 par serveur) avec la capacité associée.
   private HashMap<RepartiteurThread, Integer> threads;
+
+  // Résultat final de notre fichier d'opérations.
   private int result;
 
-	public static void main(String[] args) {
+
+	public static void main(String[] args)
+  {
     HashMap<String,Integer> socket = new HashMap<String, Integer>();
     HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();//hashmap contenant les socket serveur et leur capacité
 
-    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) {
+    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1))
+    {
       System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./client Fichier  Mode d'execution:(S = 0/NS = 1)\n");
     }
     else
     {
       try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt"))) {
         String line;
-        while ((line = lines.readLine()) != null) {
+        while ((line = lines.readLine()) != null)
+        {
           socket.put(line.split(":")[0], Integer.parseInt(line.split(":")[1]));
           servers.put(socket, Integer.parseInt(line.split(":")[2]));
         }
@@ -46,25 +60,40 @@ public class Client {
     }
 	}
 
-
-	public Client(HashMap<HashMap<String, Integer>, Integer> servers, String file, int mode) {
+  /**
+   * Constructeur du Répartirteur
+   * @param  HashMap<HashMap<String, Integer>, Integer>  servers  HashMap des serveurs disponibles ainsi que leur capacité respective.
+   * @param  String                  file          Fichier contenant la liste d'opérations à effectuer.
+   * @param  int                     mode          Mode de sécurité de notre répartirteur.
+   * @return                         Répartirteur.
+   */
+	public Client(HashMap<HashMap<String, Integer>, Integer> servers, String file, int mode)
+  {
 		super();
+
+    //Initialisation des arguments.
     this._mode = mode;
     this.operations_stack = new ArrayList<Operation>();
     this.in_progress_operations_stack = Collections.synchronizedList(new ArrayList<Operation>());
     this.threads = new HashMap<RepartiteurThread, Integer>();
     this.result = 0;
+
 		if (System.getSecurityManager() == null)
 		{
 			System.setSecurityManager(new SecurityManager());
 		}
-    FileToArray(file);
-    for (HashMap<String, Integer> socket : servers.keySet()) {
-        RepartiteurThread t = new RepartiteurThread(loadServerStub(socket));
-        threads.put(t, servers.get(socket));
-        t.start();
 
-      }
+    //Initialisation de la pile d'opérations à faire.
+    FileToArray(file);
+
+    // Création des threads avec le stub d'un serveur ainsi que la capacité associée.
+    // Démarrage des threads qui vont être en attente d'opérations à effectuer.
+    for (HashMap<String, Integer> socket : servers.keySet())
+    {
+      RepartiteurThread t = new RepartiteurThread(loadServerStub(socket));
+      threads.put(t, servers.get(socket));
+      t.start();
+    }
 	}
 
 	private void run()
@@ -96,7 +125,7 @@ public class Client {
         }
       }
 
-    
+
       //Traitement de la pile d'opération : On vérifie la résolution des opérations en cours de traitement.
       Iterator it = in_progress_operations_stack.iterator();
       while (it.hasNext())
@@ -106,7 +135,7 @@ public class Client {
         {
           if(operation_inprogress.isSolved())
           {
-            this.result += operation_inprogress.getResult()%4000;
+            this.result = (this.result + operation_inprogress.getResult())%4000;
           }
           else
           {
@@ -114,24 +143,27 @@ public class Client {
             operations_stack.add(operation_inprogress);
 
           }
-
           it.remove();
         }
 
       }
-  
+
     }
       for (RepartiteurThread thread : threads.keySet())
       {
        thread.setInprogress(false);
-      } 
-
-
+      }
 
     System.out.println("result:"+this.result);
   }
 
-	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
+  /**
+   * Méthode permettant de récupérer le stub associé à notre serveur.
+   * @param HashMap<String, Integer>  socket Ip et port d'écoute du rmiregistry associé au serveur.
+   * @return                 Stub associé au serveur.
+   */
+	private ServerInterface loadServerStub(HashMap<String, Integer> socket)
+  {
 		ServerInterface stub = null;
 
 		try
@@ -159,10 +191,17 @@ public class Client {
 		return stub;
 	}
 
-  private void FileToArray(String file) {
-    try (BufferedReader lines = new BufferedReader(new FileReader("Operations/" + file))) {
+  /**
+   * Méthode qui récupère toutes les opérations du fichier pour les mettre dans la pile adéquate.
+   * @param String file fichier à traiter.
+   */
+  private void FileToArray(String file)
+  {
+    try (BufferedReader lines = new BufferedReader(new FileReader("Operations/" + file)))
+    {
       String line;
-      while ((line = lines.readLine()) != null) {
+      while ((line = lines.readLine()) != null)
+      {
         if (this._mode == 0)
           this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 1));
         else if (this._mode == 1)
@@ -175,10 +214,13 @@ public class Client {
     }
   }
 
-  private void setCapacity(RepartiteurThread thread, Boolean uprate) {
-    if (uprate){
+  private void setCapacity(RepartiteurThread thread, Boolean uprate)
+  {
+    if (uprate)
+    {
       threads.put(thread, threads.get(thread) + threads.get(thread));
-    } else {
+    } else
+    {
       threads.put(thread, threads.get(thread) - threads.get(thread));
     }
   }
