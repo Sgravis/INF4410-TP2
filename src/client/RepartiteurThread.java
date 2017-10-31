@@ -65,21 +65,28 @@ public class RepartiteurThread extends Thread {
           this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
         }
         tampon = stub.Calculer(this.serial_string);
-        if (!tampon.equals("refus"))
-        {
-          this.results = tampon.split("&");
-          if (this.results.length == this.task.size())
-          {
-           try
+         try
            {
             Thread.sleep(0,1);
             }
            catch(Exception e){}
+        if (!tampon.equals("refus"))
+        {
+
+          this.results = tampon.split("&");
+          if (this.results.length == this.task.size())
+          {
             for (int i = 0; i < this.results.length; i++)
              {
                this.task.get(i).setResult(Integer.parseInt(this.results[i]));
                this.task.get(i).setValidation();
+                      try
+        {
+          Thread.sleep(0,1);
+        }
+        catch(Exception e){}
              }
+
           }
           
         }else
