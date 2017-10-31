@@ -15,14 +15,8 @@ import shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
-	// Capacité de notre serveur.
 	private int capacite;
-
-	// taux de malveillance théorique de notre serveur .
-	// Représente les mauvaises réponses qu'il peut nous renvoyer.
 	private int taux_malveillance;
-
-	// Résultat sérialisé de l'opération que le serveur vient de traiter.
 	private String resultat;
 
 
@@ -46,12 +40,6 @@ public class Server implements ServerInterface {
 		}
 	}
 
-	/**
-	 * Constructeur du serveur.
-	 * @param  int capacite         Capacité du serveur.
-	 * @param  int taux_malveillance Taux de malveillance du serveur.
-	 * @return     Serveur
-	 */
 	public Server(int capacite, int taux_malveillance) {
 		super();
 		this.capacite = capacite;
@@ -84,17 +72,11 @@ public class Server implements ServerInterface {
 		}
 	}
 
-	/**
-	 * Méthode pour le traitement d'une liste d'opérations.
-	 * @param  String          operation_string opérations à faire sous forme sérialisée.
-	 * @return                 résultat des opérations sous forme sérialisée.
-	 * @throws RemoteException concernant l'appel aux RPC.
-	 */
 	public String Calculer(String operation_string) throws RemoteException
 	{
 		this.resultat = "";
 		String[] operation_liste = operation_string.split("&");
-		//if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
+		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
 			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
 			{
 				String[] operation = operation_liste[i].split(":");
@@ -111,9 +93,9 @@ public class Server implements ServerInterface {
 					continue; //En cas d'opération inconnue..
 				}
 			}
-		//} else {
-			//this.resultat = null;
-		//}
+		} else {
+			this.resultat = "refus";
+		}
 		return this.resultat;
 	}
 
@@ -125,7 +107,7 @@ public class Server implements ServerInterface {
 			}
 			else
 			{
-				return random(100000);
+				return random(10000000);
 			}
 	}
 
@@ -139,7 +121,7 @@ public class Server implements ServerInterface {
 			}
 			else
 			{
-				return random(100000);
+				return random(10000000);
 			}
 	}
 
@@ -150,6 +132,12 @@ public class Server implements ServerInterface {
 	}
 
 	private Boolean HitRateCalculation(int number_operations) {
-			return (random(((number_operations - this.capacite)/(this.capacite*5))*100)) > (((number_operations - this.capacite)/(this.capacite*5))*100);
+		System.out.println("Capacite :"+this.capacite+"nombre operations"+number_operations);
+		float taux=((number_operations - this.capacite)/(this.capacite*5))*100;
+		System.out.println("taux :"+taux);
+		float chance = random(100);
+		System.out.println("chance:"+chance);
+		return (taux < chance);
 	}
 }
+
