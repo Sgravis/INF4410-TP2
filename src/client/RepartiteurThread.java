@@ -84,7 +84,6 @@ public class RepartiteurThread extends Thread {
           
         }else
         {
-          System.out.println("Il faut baisser le taux");
          this.overload = true;
 
         }
@@ -117,7 +116,6 @@ public class RepartiteurThread extends Thread {
     }
     public void setTask(ArrayList<Operation> task)
     {
-      System.out.println(task.size());
       this.task = task;
       this.busy=true;
     }

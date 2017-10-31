@@ -132,11 +132,8 @@ public class Server implements ServerInterface {
 	}
 
 	private Boolean HitRateCalculation(int number_operations) {
-		System.out.println("Capacite :"+this.capacite+"nombre operations"+number_operations);
-		float taux=((number_operations - this.capacite)/(this.capacite*5))*100;
-		System.out.println("taux :"+taux);
+		float taux=(((float)number_operations - (float)this.capacite)/((float)this.capacite*5))*100;
 		float chance = random(100);
-		System.out.println("chance:"+chance);
 		return (taux < chance);
 	}
 }
