@@ -15,12 +15,20 @@ import shared.ServerInterface;
 
 public class Server implements ServerInterface {
 
+	// Capacité de notre serveur.
 	private int capacite;
+
+	// taux de malveillance théorique de notre serveur .
+	// Représente les mauvaises réponses qu'il peut nous renvoyer.
 	private int taux_malveillance;
+
+	// Résultat sérialisé de l'opération que le serveur vient de traiter.
 	private String resultat;
 
 
-	public static void main(String[] args) {
+
+	public static void main(String[] args)
+	{
 
 		int capacite;
 		int taux_malveillance;
@@ -40,7 +48,14 @@ public class Server implements ServerInterface {
 		}
 	}
 
-	public Server(int capacite, int taux_malveillance) {
+	/**
+	 * Constructeur du serveur.
+	 * @param  int capacite         Capacité du serveur.
+	 * @param  int taux_malveillance Taux de malveillance du serveur.
+	 * @return     Serveur
+	 */
+	public Server(int capacite, int taux_malveillance)
+	{
 		super();
 		this.capacite = capacite;
 		this.taux_malveillance = taux_malveillance;
@@ -72,11 +87,18 @@ public class Server implements ServerInterface {
 		}
 	}
 
+	/**
+	 * Méthode pour le traitement d'une liste d'opérations.
+	 * @param  String          operation_string opérations à faire sous forme sérialisée.
+	 * @return                 résultat des opérations sous forme sérialisée.
+	 * @throws RemoteException concernant l'appel aux RPC.
+	 */
 	public String Calculer(String operation_string) throws RemoteException
 	{
 		this.resultat = "";
 		String[] operation_liste = operation_string.split("&");
-		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) {
+		if (HitRateCalculation(Integer.parseInt(operation_liste[0])))
+		{
 			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
 			{
 				String[] operation = operation_liste[i].split(":");
@@ -93,12 +115,19 @@ public class Server implements ServerInterface {
 					continue; //En cas d'opération inconnue..
 				}
 			}
-		} else {
+		}
+		else
+		{
 			this.resultat = "refus";
 		}
 		return this.resultat;
 	}
 
+	/**
+	 * calcul de l'opération pell
+	 * @param  int valeur        opérande associé
+	 * @return     Résultat de l'opération
+	 */
 	private int pell(int valeur)
 	{
 			if(random(100) >= taux_malveillance)
@@ -111,7 +140,11 @@ public class Server implements ServerInterface {
 			}
 	}
 
-
+	/**
+	 * calcul de l'opération prime
+	 * @param  int valeur        opérande associé
+	 * @return     Résultat de l'opération
+	 */
 	private int prime(int valeur)
 	{
 
@@ -125,19 +158,26 @@ public class Server implements ServerInterface {
 			}
 	}
 
-
+	/**
+	 * Méthode de calcul d'un nombre aléatoire permettant la simulation de surcharge de ressources ou le taux de malveillance.
+	 * @param  int border        borne supérieure de la randomisation
+	 * @return     nombre aléatoire entre 0 et border
+	 */
 	private int random(int border)
 	{
 		return (new Random().nextInt(border));
 	}
 
-	private Boolean HitRateCalculation(int number_operations) {
-		System.out.println("Capacite :"+this.capacite+"nombre operations"+number_operations);
+	/**
+	 * Méthode permettant de simuler la surcharge théoriques d'un serveur en calculant le taux en fonction de la capacité et du nombre d'opérations envoyés.
+	 * Le serveur est en surcharge quand ce taux est supérieur au nombre aléatoire généré entre 0 et 100.
+	 * @param  int number_operations nombre d'opérations envoyées au serveur par le thread
+	 * @return     Booléen de validation de la tache envoyée au serveur.
+	 */
+	private Boolean HitRateCalculation(int number_operations)
+	{
 		float taux=((number_operations - this.capacite)/(this.capacite*5))*100;
-		System.out.println("taux :"+taux);
 		float chance = random(100);
-		System.out.println("chance:"+chance);
 		return (taux < chance);
 	}
 }
-
