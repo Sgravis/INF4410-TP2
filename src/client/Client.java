@@ -73,6 +73,8 @@ public class Client {
 
 	private void run()
   {
+    long start = System.nanoTime();
+
     ArrayList<Operation> task;
     while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty())
     {
@@ -132,12 +134,14 @@ public class Client {
       }
   
     }
+      System.out.println("result:"+this.result);
+      long end = System.nanoTime();
+      System.out.println("Temps écoulé appel RMI distant: "
+          + ((end - start)*0.000001) + " ms");
       for (RepartiteurThread thread : threads.keySet())
       {
        thread.setInprogress(false);
       } 
-
-    System.out.println("result:"+this.result);
   }
 
 	private ServerInterface loadServerStub(HashMap<String, Integer> socket) {
