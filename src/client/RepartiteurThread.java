@@ -35,6 +35,8 @@ public class RepartiteurThread extends Thread {
 
   // Liste des résultats de nos opérations.
   private String[] results;
+
+  // Booléen concernant l'état du serveur associé au thread.
   private boolean down;
 
 
@@ -90,54 +92,58 @@ public class RepartiteurThread extends Thread {
    * Si l'on reçoit une chaine sérialisée, on la désérialise et on traite le résultat de chaque opération.
    * On gère également le cas ou le serveur serait coupé au milieu d'une requête avec une levée de RemoteException
    */
-  private void traitement()
-  {
-    String tampon = "";
-    try
-    {
-      this.serial_string = Integer.toString(this.task.size());
-      for (Operation operation : this.task)
-      {
-        this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
-      }
-      tampon = stub.Calculer(this.serial_string);
-      if (!tampon.equals("refus"))
-      {
-        this.results = tampon.split("&");
-        if (this.results.length == this.task.size())
-        {
-         try
+   private void traitement()
+   {
+     String tampon = "";
+     try
+     {
+       this.serial_string = Integer.toString(this.task.size());
+       for (Operation operation : this.task)
+       {
+         this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
+       }
+       tampon = stub.Calculer(this.serial_string);
+       try
+       {
+         Thread.sleep(0,1);
+       }
+       catch(Exception e){}
+         if (!tampon.equals("refus"))
          {
-          Thread.sleep(0,1);
-          }
-         catch(Exception e){}
-          for (int i = 0; i < this.results.length; i++)
+
+           this.results = tampon.split("&");
+           if (this.results.length == this.task.size())
            {
-             this.task.get(i).setResult(Integer.parseInt(this.results[i]));
-             this.task.get(i).setValidation();
+             for (int i = 0; i < this.results.length; i++)
+             {
+               this.task.get(i).setResult(Integer.parseInt(this.results[i]));
+               this.task.get(i).setValidation();
+               try
+               {
+                 Thread.sleep(0,1);
+               }
+               catch(Exception e){}
+               }
+             }
            }
-        }
+           else
+           {
+             this.overload = true;
 
-      }
-      else
-      {
-        System.out.println("Il faut baisser le taux");
-       this.overload = true;
+           }
+         }
+         catch (RemoteException e)
+         {
+           System.out.println("Probleme du cote du serveur : plus d'envoie a ce serveur."+Thread.currentThread().getName());
+           this.down=true;
 
-      }
-    }
-    catch (RemoteException e)
-    {
-     System.out.println("Probleme du cote du serveur : plus d'envoie a ce serveur."+Thread.currentThread().getName());
-     this.down=true;
-
-    }
-    for (int i = 0; i < this.task.size(); i++)
-    {
-         this.task.get(i).setTreatment(true);
-    }
-    this.busy=false;
-  }
+         }
+         for (int i = 0; i < this.task.size(); i++)
+         {
+           this.task.get(i).setTreatment(true);
+         }
+         this.busy=false;
+       }
 
   /**
    * Accesseur du booléen de progression de la tache globale.

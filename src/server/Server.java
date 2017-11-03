@@ -176,7 +176,7 @@ public class Server implements ServerInterface {
 	 */
 	private Boolean HitRateCalculation(int number_operations)
 	{
-		float taux=((number_operations - this.capacite)/(this.capacite*5))*100;
+		float taux=(((float)number_operations - (float)this.capacite)/((float)this.capacite*5))*100;
 		float chance = random(100);
 		return (taux < chance);
 	}
