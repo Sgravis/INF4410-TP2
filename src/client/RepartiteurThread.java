@@ -73,16 +73,16 @@ public class RepartiteurThread extends Thread {
     while(inprogress)
     {
      try
-      {
-        Thread.sleep(0,1);
-      }
-      catch(Exception e){}
-      if (busy)
-      {
-        traitement();
-      }
+     {
+      Thread.sleep(0,1);
+    }
+    catch(Exception e){}
+    if (busy)
+    {
+      traitement();
     }
   }
+}
 
   /**
    * Méthode pour le traitement d'une sous liste d'opérations.
@@ -92,58 +92,58 @@ public class RepartiteurThread extends Thread {
    * Si l'on reçoit une chaine sérialisée, on la désérialise et on traite le résultat de chaque opération.
    * On gère également le cas ou le serveur serait coupé au milieu d'une requête avec une levée de RemoteException
    */
-   private void traitement()
+  private void traitement()
+  {
+   String tampon = "";
+   try
    {
-     String tampon = "";
+     this.serial_string = Integer.toString(this.task.size());
+     for (Operation operation : this.task) //sérialisation des taches a effectuer
+     {
+       this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
+     }
+     tampon = stub.Calculer(this.serial_string); //envoie des taches au serveur
      try
      {
-       this.serial_string = Integer.toString(this.task.size());
-       for (Operation operation : this.task)
+       Thread.sleep(0,1);
+     }
+     catch(Exception e){}
+     if (!tampon.equals("refus")) //si le serveur n'est pas surchargé : ajout des resultats de chaque opération
+     {
+
+       this.results = tampon.split("&");
+       if (this.results.length == this.task.size())
        {
-         this.serial_string += "&" + operation.getOperationName() + ":" + operation.getOperande();
-       }
-       tampon = stub.Calculer(this.serial_string);
-       try
-       {
-         Thread.sleep(0,1);
-       }
-       catch(Exception e){}
-         if (!tampon.equals("refus"))
+         for (int i = 0; i < this.results.length; i++)
          {
-
-           this.results = tampon.split("&");
-           if (this.results.length == this.task.size())
+           this.task.get(i).setResult(Integer.parseInt(this.results[i]));
+           this.task.get(i).setValidation(); //appel de la routine de validation 
+           try
            {
-             for (int i = 0; i < this.results.length; i++)
-             {
-               this.task.get(i).setResult(Integer.parseInt(this.results[i]));
-               this.task.get(i).setValidation();
-               try
-               {
-                 Thread.sleep(0,1);
-               }
-               catch(Exception e){}
-               }
-             }
+             Thread.sleep(0,1);
            }
-           else
-           {
-             this.overload = true;
-
-           }
+           catch(Exception e){}
          }
-         catch (RemoteException e)
-         {
-           System.out.println("Probleme du cote du serveur : plus d'envoie a ce serveur."+Thread.currentThread().getName());
-           this.down=true;
-
-         }
-         for (int i = 0; i < this.task.size(); i++)
-         {
-           this.task.get(i).setTreatment(true);
-         }
-         this.busy=false;
        }
+     }
+     else //si le serveur est surchargé
+     {
+       this.overload = true;
+
+     }
+   }
+   catch (RemoteException e)
+   {
+     System.out.println("Probleme du cote du serveur : plus d'envoie a ce serveur."+Thread.currentThread().getName());
+     this.down=true;
+
+   }
+   for (int i = 0; i < this.task.size(); i++) //passe l'etat des opérations a "traitées"
+   {
+     this.task.get(i).setTreatment(true);
+   }
+   this.busy=false; //le serveur est a nouveau disponible aux calculs
+ }
 
   /**
    * Accesseur du booléen de progression de la tache globale.
@@ -189,8 +189,8 @@ public class RepartiteurThread extends Thread {
    */
   public Boolean getOverload()
   {
-     return this.overload;
-  }
+   return this.overload;
+ }
 
   /**
    * Accesseur du booléen de surcharge du serveur
@@ -198,6 +198,6 @@ public class RepartiteurThread extends Thread {
    */
   public void setOverload(Boolean reset)
   {
-     this.overload = reset;
-  }
+   this.overload = reset;
+ }
 }

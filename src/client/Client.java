@@ -39,14 +39,17 @@ public class Client {
     //hashmap contenant les socket serveur et leur capacité.
     HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();
 
-    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) {
+    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) 
+    {
       System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./client Fichier  Mode d'execution:(S = 0/NS = 1)\n");
     }
     else
     {
-      try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt"))) {
+      try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt"))) 
+      {
         String line;
-        while ((line = lines.readLine()) != null) {
+        while ((line = lines.readLine()) != null) 
+        {
           HashMap<String,Integer> socket = new HashMap<String, Integer>();
           socket.put(line.split(":")[0], Integer.parseInt(line.split(":")[1]));
           servers.put(socket,Integer.parseInt(line.split(":")[2]));
@@ -107,23 +110,26 @@ public class Client {
     while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty())
     {
 
-      //Traitement des threads : On vérifie leur état avant de leur envoyer une tache s'ils sont disponibles.
+      //Boucle d'envoie de tache aux threads
       for (RepartiteurThread thread : threads.keySet())
       {
-        if(!thread.getBusy() && !thread.getDown())
+        if(!thread.getBusy() && !thread.getDown()) //Si le thread n'est pas occupé et n'est pas coupé, on peut lui envoyer des taches
         {
-          if(thread.getOverload())
+          //ajustement de sa capacité en fonction de sa réponse precedente
+          if(thread.getOverload()) //on diminue sa capacité si il est surchargé
           {
              setCapacity(thread,false);
-          }else{
+          }
+          else //on baisse sa capacité si il ne l'est pas
+          {
              setCapacity(thread,true);
           }
-          if(!operations_stack.isEmpty())
+          if(!operations_stack.isEmpty()) //si la pile d'operations n'est pas vide on lui en envoie des taches restantes
           {
             task=thread_op.get(thread);
             task.clear();
 
-            for (int i = 0; i < threads.get(thread); i++)
+            for (int i = 0; i < threads.get(thread); i++) //on lui envoie autant de tâche que sa capacité l'autorise.
             {
               if(!operations_stack.isEmpty())
               {
@@ -132,7 +138,7 @@ public class Client {
                  operations_stack.remove(operations_stack.get(0));
               }
             }
-            thread.setTask(task);
+            thread.setTask(task); 
           }
         }
       }
@@ -143,13 +149,13 @@ public class Client {
       while (it.hasNext())
       {
         Operation operation_inprogress =(Operation)it.next();
-        if (operation_inprogress.getTreatment())
+        if (operation_inprogress.getTreatment()) //L'opération a été traitée par un serveur
         {
-          if(operation_inprogress.isSolved())
+          if(operation_inprogress.isSolved()) //Si celle ci est resolue, on ajoute son resultat
           {
             this.result =(this.result+  operation_inprogress.getResult())%4000;
           }
-          else
+          else //sinon, on la remet dans la pile d'opération a traiter.
           {
             operation_inprogress.setTreatment(false);
             operations_stack.add(operation_inprogress);
@@ -162,7 +168,7 @@ public class Client {
       }
 
     }
-      System.out.println("result:"+this.result);
+      System.out.println("result:"+this.result); //affichage du resultat
       long end = System.nanoTime();
       System.out.println("Temps écoulé appel RMI distant: "
           + ((end - start)*0.000001) + " ms");

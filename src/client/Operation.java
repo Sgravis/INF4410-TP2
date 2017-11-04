@@ -90,13 +90,13 @@ public class Operation {
    */
    public void setValidation()
    {
-     //  if(!solved){
-     if(validation == 1)
+
+     if(validation == 1) //si nous sommes en mode sécurisé : un seul resultat suffit a valider l'opération.
      {
        this.result=this.possible_results.get(0);
        this.solved=true;
      }
-     else
+     else //si nous sommes en mode non sécurisé : deux resultats doivent concorder pour valider l'opération.
      {
        for(int i = 0; i < possible_results.size(); i++)
        {
@@ -116,7 +116,8 @@ public class Operation {
    * Accesseur pour le résultat de l'opération.
    * @param int result  Résultat de notre opération.
    */
-  public void setResult(int result) {
+  public void setResult(int result) 
+  {
     this.possible_results.add(result);
   }
 
@@ -124,7 +125,8 @@ public class Operation {
    * Accesseur pour le résultat de l'opération
    * @return  Renvoie le résultat de l'opération.
    */
-  public int getResult() {
+  public int getResult() 
+  {
     return this.result;
   }
 
@@ -132,7 +134,8 @@ public class Operation {
    * Accesseur pour l'état de traitement de l'opération.
    * @return L'état de traitement de l'opération.
    */
-  public Boolean getTreatment(){
+  public Boolean getTreatment()
+  {
     return this.treatment;
   }
 
