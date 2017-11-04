@@ -134,8 +134,8 @@ public class Client {
               if(!operations_stack.isEmpty())
               {
                  task.add(operations_stack.get(0));
-                 in_progress_operations_stack.add(operations_stack.get(0));
-                 operations_stack.remove(operations_stack.get(0));
+                 in_progress_operations_stack.add(operations_stack.get(0)); //ajout de la tache a la pile d'opération en cours
+                 operations_stack.remove(operations_stack.get(0)); //suppression de la tache de la pile d'opération.
               }
             }
             thread.setTask(task); 
