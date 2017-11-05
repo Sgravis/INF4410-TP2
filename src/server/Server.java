@@ -97,9 +97,9 @@ public class Server implements ServerInterface {
 	{
 		this.resultat = "";
 		String[] operation_liste = operation_string.split("&");
-		if (HitRateCalculation(Integer.parseInt(operation_liste[0])))
+		if (HitRateCalculation(Integer.parseInt(operation_liste[0]))) //si le serveur n'est pas surchargé
 		{
-			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++)
+			for (int i = 1; i <= Integer.parseInt(operation_liste[0]); i++) //calcul pour chaque operation
 			{
 				String[] operation = operation_liste[i].split(":");
 				if (operation[0].equals("pell"))
@@ -116,7 +116,7 @@ public class Server implements ServerInterface {
 				}
 			}
 		}
-		else
+		else //serveur surchargé
 		{
 			this.resultat = "refus";
 		}
@@ -130,11 +130,11 @@ public class Server implements ServerInterface {
 	 */
 	private int pell(int valeur)
 	{
-			if(random(100) >= taux_malveillance)
+			if(random(100) >= taux_malveillance) //resultat correct
 			{
-				return Operations.pell(valeur);
+				return Operations.pell(valeur); 
 			}
-			else
+			else //resultat erroné
 			{
 				return random(10000000);
 			}
@@ -148,11 +148,11 @@ public class Server implements ServerInterface {
 	private int prime(int valeur)
 	{
 
-			if(random(100) >= taux_malveillance)
+			if(random(100) >= taux_malveillance) //resultat correct
 			{
 				return Operations.prime(valeur);
 			}
-			else
+			else //resultat erroné 
 			{
 				return random(10000000);
 			}

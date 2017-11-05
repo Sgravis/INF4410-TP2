@@ -96,13 +96,13 @@ public class Operation {
        this.result=this.possible_results.get(0);
        this.solved=true;
      }
-     else //si nous sommes en mode non sécurisé : deux resultats doivent concorder pour valider l'opération.
+     else //si nous sommes en mode non sécurisé : deux resultats possible doivent concorder pour valider l'opération.
      {
        for(int i = 0; i < possible_results.size(); i++)
        {
          for (int j = i + 1; j < possible_results.size(); j++)
          {
-           if (possible_results.get(i).equals(possible_results.get(j)))
+           if (possible_results.get(i).equals(possible_results.get(j))) //si deux resultats possible concordent : on valide l'operation
            {
              this.result = possible_results.get(i);
              this.solved = true;

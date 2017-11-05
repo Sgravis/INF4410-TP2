@@ -39,11 +39,11 @@ public class Client {
     //hashmap contenant les socket serveur et leur capacité.
     HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();
 
-    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) 
+    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) //Nombre d'arguments incorrect 
     {
       System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./client Fichier  Mode d'execution:(S = 0/NS = 1)\n");
     }
-    else
+    else //remplissage de la hashmap contenant les informations sur les serveurs 
     {
       try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt"))) 
       {
@@ -76,11 +76,11 @@ public class Client {
   {
     //Initialisation des attributs
 		super();
-    this._mode = mode;
-    this.operations_stack = new ArrayList<Operation>();
-    this.in_progress_operations_stack = Collections.synchronizedList(new ArrayList<Operation>());
-    this.threads = new HashMap<RepartiteurThread, Integer>();
-    this.thread_op = new HashMap<RepartiteurThread,ArrayList<Operation>>();
+    this._mode = mode; //mode de fonctionnement du serveur : 0=sécurisé; 1=non sécurisé
+    this.operations_stack = new ArrayList<Operation>(); //liste contenant les opérations a réaliser
+    this.in_progress_operations_stack = Collections.synchronizedList(new ArrayList<Operation>()); //liste contenant les opérations en cours: cette liste est threadsafe
+    this.threads = new HashMap<RepartiteurThread, Integer>(); //Hashmap contenant les threads et leur capacité
+    this.thread_op = new HashMap<RepartiteurThread,ArrayList<Operation>>(); //Hashmap contenant les threads et leur liste d'opération en cours.
     this.result = 0;
 
 
@@ -89,10 +89,10 @@ public class Client {
 			System.setSecurityManager(new SecurityManager());
 		}
 
-    //Création de le pile d'opérations.
+    //Initialisation de le pile d'opérations à réaliser.
     FileToArray(file);
 
-    //Création des threads
+    //Création des threads 
     for (HashMap<String, Integer> socket : servers.keySet())
     {
       RepartiteurThread t = new RepartiteurThread(loadServerStub(socket));
@@ -105,9 +105,8 @@ public class Client {
 	private void run()
   {
     long start = System.nanoTime();
-
     ArrayList<Operation> task;
-    while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty())
+    while(!operations_stack.isEmpty() || !in_progress_operations_stack.isEmpty()) // Boucle tant que les deux listes ne sont pas vides : il reste des opérations a faire
     {
 
       //Boucle d'envoie de tache aux threads
@@ -144,7 +143,7 @@ public class Client {
       }
 
 
-      //Traitement de la pile d'opération : On vérifie la résolution des opérations en cours de traitement.
+      //Traitement de la pile d'opération en cours : On vérifie la résolution des opérations en cours de traitement.
       Iterator it = in_progress_operations_stack.iterator();
       while (it.hasNext())
       {
@@ -155,7 +154,7 @@ public class Client {
           {
             this.result =(this.result+  operation_inprogress.getResult())%4000;
           }
-          else //sinon, on la remet dans la pile d'opération a traiter.
+          else //sinon, on la remet dans la pile d'opération a traiter : elle doit etre retraitée.
           {
             operation_inprogress.setTreatment(false);
             operations_stack.add(operation_inprogress);
@@ -222,9 +221,9 @@ public class Client {
       String line;
       while ((line = lines.readLine()) != null)
       {
-        if (this._mode == 0)
+        if (this._mode == 0) //mode sécurisé
           this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 1));
-        else if (this._mode == 1)
+        else if (this._mode == 1) //mode non sécurisé
           this.operations_stack.add(new Operation(line.split(" ")[0],Integer.parseInt(line.split(" ")[1]), 2));
       }
     }
@@ -242,11 +241,11 @@ public class Client {
    */
   private void setCapacity(RepartiteurThread thread, Boolean uprate)
   {
-    if (uprate)
+    if (uprate) //augmentation du nombre d'operations a envoyer au serveur
     {
       threads.put(thread, threads.get(thread) + 2);
     }
-    else
+    else //baisse du nombre d'operations a envoyer au serveur
     {
       threads.put(thread, threads.get(thread) - 2);
     }

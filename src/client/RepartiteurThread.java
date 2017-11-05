@@ -66,23 +66,23 @@ public class RepartiteurThread extends Thread {
    * Boucle d'un thread.
    * Tant que le thread peut recevoir des opérations, il passe dans la boucle while.
    * Si le thread n'est pas pas busy, le répartirteur peut lui en envoyer.
-   * S'il est busy c'est qu'il vient d'en recevoir qu'il est entrain de communiquer avec le serveur pour traiter la requête.
+   * S'il est busy c'est qu'il est en train de traiter des opérations.
    */
   private void loop()
   {
     while(inprogress)
     {
-     try
-     {
-      Thread.sleep(0,1);
-    }
-    catch(Exception e){}
-    if (busy)
-    {
-      traitement();
+      try 
+      {
+        Thread.sleep(0,1); //temporisation : laisser du temps
+      }
+      catch(Exception e){}
+      if (busy) //si il a des opérations a traiter
+      {
+        traitement();
+      }
     }
   }
-}
 
   /**
    * Méthode pour le traitement d'une sous liste d'opérations.
@@ -108,19 +108,19 @@ public class RepartiteurThread extends Thread {
        Thread.sleep(0,1);
      }
      catch(Exception e){}
-     if (!tampon.equals("refus")) //si le serveur n'est pas surchargé : ajout des resultats de chaque opération
+     if (!tampon.equals("refus")) //si le serveur n'est pas surchargé 
      {
 
        this.results = tampon.split("&");
        if (this.results.length == this.task.size())
        {
-         for (int i = 0; i < this.results.length; i++)
+         for (int i = 0; i < this.results.length; i++) // ajout des resultats dans chaque operation
          {
            this.task.get(i).setResult(Integer.parseInt(this.results[i]));
            this.task.get(i).setValidation(); //appel de la routine de validation 
            try
            {
-             Thread.sleep(0,1);
+             Thread.sleep(0,1); //temporisation
            }
            catch(Exception e){}
          }
@@ -132,7 +132,7 @@ public class RepartiteurThread extends Thread {
 
      }
    }
-   catch (RemoteException e)
+   catch (RemoteException e) //si le serveur ne repond plus
    {
      System.out.println("Probleme du cote du serveur : plus d'envoie a ce serveur."+Thread.currentThread().getName());
      this.down=true;
