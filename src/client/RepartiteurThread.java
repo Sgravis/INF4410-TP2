@@ -72,7 +72,7 @@ public class RepartiteurThread extends Thread {
   {
     while(inprogress)
     {
-      try 
+      try
       {
         Thread.sleep(0,1); //temporisation : laisser du temps
       }
@@ -108,7 +108,7 @@ public class RepartiteurThread extends Thread {
        Thread.sleep(0,1);
      }
      catch(Exception e){}
-     if (!tampon.equals("refus")) //si le serveur n'est pas surchargé 
+     if (!tampon.equals("refus")) //si le serveur n'est pas surchargé
      {
 
        this.results = tampon.split("&");
@@ -117,7 +117,7 @@ public class RepartiteurThread extends Thread {
          for (int i = 0; i < this.results.length; i++) // ajout des resultats dans chaque operation
          {
            this.task.get(i).setResult(Integer.parseInt(this.results[i]));
-           this.task.get(i).setValidation(); //appel de la routine de validation 
+           this.task.get(i).setValidation(); //appel de la routine de validation
            try
            {
              Thread.sleep(0,1); //temporisation
@@ -178,7 +178,6 @@ public class RepartiteurThread extends Thread {
    */
   public void setTask(ArrayList<Operation> task)
   {
-    System.out.println(task.size());
     this.task = task;
     this.busy=true;
   }

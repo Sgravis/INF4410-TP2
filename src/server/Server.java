@@ -62,6 +62,10 @@ public class Server implements ServerInterface {
 		this.resultat = "";
 	}
 
+	/**
+	 * Création du stub et binding du registre.
+	 * Le serveur est ensuite en attente de requêtes de la part du répartiteur.
+	 */
 	private void run()
 	{
 		if (System.getSecurityManager() == null)
@@ -132,7 +136,7 @@ public class Server implements ServerInterface {
 	{
 			if(random(100) >= taux_malveillance) //resultat correct
 			{
-				return Operations.pell(valeur); 
+				return Operations.pell(valeur);
 			}
 			else //resultat erroné
 			{
@@ -152,7 +156,7 @@ public class Server implements ServerInterface {
 			{
 				return Operations.prime(valeur);
 			}
-			else //resultat erroné 
+			else //resultat erroné
 			{
 				return random(10000000);
 			}

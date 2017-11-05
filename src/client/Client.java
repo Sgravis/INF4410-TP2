@@ -39,16 +39,16 @@ public class Client {
     //hashmap contenant les socket serveur et leur capacité.
     HashMap<HashMap<String,Integer>,Integer> servers = new HashMap<HashMap<String,Integer>,Integer>();
 
-    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) //Nombre d'arguments incorrect 
+    if (args.length != 2 && (Integer.parseInt(args[1]) != 0 || Integer.parseInt(args[1]) != 1)) //Nombre d'arguments incorrect
     {
       System.out.println("Erreur : Nombre d'arguments incorrect \n\tUsage : ./client Fichier  Mode d'execution:(S = 0/NS = 1)\n");
     }
-    else //remplissage de la hashmap contenant les informations sur les serveurs 
+    else //remplissage de la hashmap contenant les informations sur les serveurs
     {
-      try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt"))) 
+      try (BufferedReader lines = new BufferedReader(new FileReader("src/client/Servers.txt")))
       {
         String line;
-        while ((line = lines.readLine()) != null) 
+        while ((line = lines.readLine()) != null)
         {
           HashMap<String,Integer> socket = new HashMap<String, Integer>();
           socket.put(line.split(":")[0], Integer.parseInt(line.split(":")[1]));
@@ -60,6 +60,7 @@ public class Client {
       {
         System.out.println("Erreur: " + e.getMessage());
       }
+      //Création de l'objet répartiteur.
       Client client = new Client(servers, args[0], Integer.parseInt(args[1]));
       client.run();
     }
@@ -92,7 +93,7 @@ public class Client {
     //Initialisation de le pile d'opérations à réaliser.
     FileToArray(file);
 
-    //Création des threads 
+    //Création des threads
     for (HashMap<String, Integer> socket : servers.keySet())
     {
       RepartiteurThread t = new RepartiteurThread(loadServerStub(socket));
@@ -102,6 +103,16 @@ public class Client {
     }
 	}
 
+  /**
+   * Méthode principale de notre répartirteur.
+   * Dans un premier temps, on va initialiser le temps pour connaitre la durée d'execution de notre programme.
+   * Nous allons ensuite rentrer dans la boucle principale d'exécution tant que la pile d'opérations à faire ou celles en cours de traitement n'est pas vide.
+   * La première partie de cette boucle consiste en la répartition des taches vers nos threads pour qu'ils communiquent avec les serveurs.
+   * La seconde partie de la boucle est le traitement de la boucle des opérations en cours de traitement.
+   * Nous regardons si l'état de l'opération est "Solved" puis nous ajoutons le résultat de l'opration au résultat géréral d'exécution.
+   * Finalement, une fois sortie de la boucle principale, nous calculons le temps d'exécution du traitement du fichier d'opérations puis nous affichons le résultat général à l'écran.
+   * Les threads sont ensuite coupés avant la fin du programme.
+   */
 	private void run()
   {
     long start = System.nanoTime();
@@ -114,16 +125,16 @@ public class Client {
       {
         if(!thread.getBusy() && !thread.getDown()) //Si le thread n'est pas occupé et n'est pas coupé, on peut lui envoyer des taches
         {
-          //ajustement de sa capacité en fonction de sa réponse precedente
+          //ajustement de sa capacité en fonction de la réponse précedente du serveur.
           if(thread.getOverload()) //on diminue sa capacité si il est surchargé
           {
              setCapacity(thread,false);
           }
-          else //on baisse sa capacité si il ne l'est pas
+          else //on augmente la capacité dans le cas contraire.
           {
              setCapacity(thread,true);
           }
-          if(!operations_stack.isEmpty()) //si la pile d'operations n'est pas vide on lui en envoie des taches restantes
+          if(!operations_stack.isEmpty()) //si la pile d'operations n'est pas vide on lui en envoie des taches à traiter
           {
             task=thread_op.get(thread);
             task.clear();
@@ -137,7 +148,7 @@ public class Client {
                  operations_stack.remove(operations_stack.get(0)); //suppression de la tache de la pile d'opération.
               }
             }
-            thread.setTask(task); 
+            thread.setTask(task);
           }
         }
       }
@@ -158,23 +169,25 @@ public class Client {
           {
             operation_inprogress.setTreatment(false);
             operations_stack.add(operation_inprogress);
-
           }
-
           it.remove();
         }
-
       }
-
     }
-      System.out.println("result:"+this.result); //affichage du resultat
-      long end = System.nanoTime();
-      System.out.println("Temps écoulé appel RMI distant: "
-          + ((end - start)*0.000001) + " ms");
-      for (RepartiteurThread thread : threads.keySet())
-      {
-       thread.setInprogress(false);
-      }
+
+    // Affichage du résultat général :
+    System.out.println("result:"+this.result);
+
+    //Calcul du temps d'exécution :
+    long end = System.nanoTime();
+    System.out.println("Temps écoulé appel RMI distant: "
+        + ((end - start)*0.000001) + " ms");
+
+    //Extinction des threads.
+    for (RepartiteurThread thread : threads.keySet())
+    {
+     thread.setInprogress(false);
+    }
   }
 
   /**
